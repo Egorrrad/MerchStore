@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (s *Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
+func (s Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
 	var req generated.PostApiSendCoinJSONRequestBody
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

@@ -34,7 +34,7 @@ func buildInventory(purchases []model.Purchase) *[]struct {
 	return &result
 }
 
-func (s *Server) GetApiInfo(w http.ResponseWriter, r *http.Request) {
+func (s Server) GetApiInfo(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value("user").(string)
 	if !ok {
 		sendError(w, http.StatusUnauthorized, "Invalid user context")

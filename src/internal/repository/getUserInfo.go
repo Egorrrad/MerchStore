@@ -5,7 +5,7 @@ import (
 	"context"
 )
 
-func (r *Repository) GetUserInfo(ctx context.Context, username string) (
+func (r Repository) GetUserInfo(ctx context.Context, username string) (
 	[]model.Purchase,
 	[]model.Operation,
 	error) {

@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (s *Server) PostApiAuth(w http.ResponseWriter, r *http.Request) {
+func (s Server) PostApiAuth(w http.ResponseWriter, r *http.Request) {
 	var req generated.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		sendError(w, http.StatusBadRequest, "Invalid request format")

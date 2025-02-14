@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (s *Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item string) {
+func (s Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item string) {
 	// Валидация названия товара
 	if fieldErrors := schemas.ValidateItemName(item); len(fieldErrors) > 0 {
 		sendValidationErrors(w, fieldErrors)
