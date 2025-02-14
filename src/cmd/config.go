@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/caarlos0/env/v9"
+import (
+	"github.com/caarlos0/env/v9"
+	"time"
+)
 
 type Config struct {
 	ServerPort string `env:"SERVER_PORT,required"`
@@ -25,3 +28,7 @@ func Load() (*Config, error) {
 	}
 	return &cfg, nil
 }
+
+var JWTSecret = []byte("your-secret-key") // Лучше загружать из ENV
+
+const TokenExpiration = time.Hour * 24 // 24 часа

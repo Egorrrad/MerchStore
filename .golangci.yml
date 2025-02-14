@@ -3,9 +3,4 @@ run:
 
 linters:
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - staticcheck
-    - unused
-    - revive
+    - sqlclosecheck

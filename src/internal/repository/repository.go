@@ -1,14 +1,15 @@
 package repository
 
-type Database interface {
-}
+import (
+	"MerchStore/src/internal/datastorage"
+)
 
 type Repository struct {
-	database Database
+	storage datastorage.DataStorage
 }
 
-func NewRepository(database Database) Repository {
+func NewRepository(storage datastorage.DataStorage) Repository {
 	return Repository{
-		database: database,
+		storage: storage,
 	}
 }

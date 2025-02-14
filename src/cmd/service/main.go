@@ -6,7 +6,9 @@ import (
 	"MerchStore/src/cmd"
 	"MerchStore/src/internal/datastorage"
 	"MerchStore/src/internal/datastorage/postgres"
+	"MerchStore/src/internal/generated"
 	"MerchStore/src/internal/handlers"
+	"MerchStore/src/internal/middleware"
 	"MerchStore/src/internal/repository"
 	"context"
 	"fmt"
@@ -39,8 +41,16 @@ func main() {
 
 	resp := repository.NewRepository(store)
 	server := handlers.NewServer(resp)
-	mux := http.NewServeMux()
-	h := handlers.HandlerFromMux(server, mux)
+
+	// Создаем опции с middleware
+	options := generated.StdHTTPServerOptions{
+		Middlewares: []generated.MiddlewareFunc{
+			middleware.JWTMiddleware,
+		},
+	}
+
+	// Передаем опции в HandlerWithOptions
+	h := generated.HandlerWithOptions(server, options)
 
 	s := &http.Server{
 		Addr:    config.ServerPort,
