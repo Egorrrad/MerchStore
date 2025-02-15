@@ -1,63 +1,84 @@
 package handlers
 
 import (
-	"MerchStore/src/internal/generated"
+	"MerchStore/src/internal/repository"
+	"MerchStore/src/internal/schemas"
 	"MerchStore/src/internal/storage/model"
 	"net/http"
 )
 
-func buildInventory(purchases []model.Purchase) *[]struct {
-	Quantity *int    `json:"quantity,omitempty"`
-	Type     *string `json:"type,omitempty"`
-} {
+func ptrInt(i int) *int       { return &i }
+func ptrStr(s string) *string { return &s }
+
+func buildInventory(purchases []model.Purchase) []schemas.InventoryItem {
 	inventory := make(map[string]int)
 	for _, p := range purchases {
 		inventory[p.ProductName] += p.Quantity
 	}
 
-	result := make([]struct {
-		Quantity *int    `json:"quantity,omitempty"`
-		Type     *string `json:"type,omitempty"`
-	}, 0, len(inventory))
-
+	result := make([]schemas.InventoryItem, 0, len(inventory))
 	for name, qty := range inventory {
-		nameCopy := name
-		qtyCopy := qty
-		result = append(result, struct {
-			Quantity *int    `json:"quantity,omitempty"`
-			Type     *string `json:"type,omitempty"`
-		}{
-			Type:     &nameCopy,
-			Quantity: &qtyCopy,
+		result = append(result, schemas.InventoryItem{
+			Type:     ptrStr(name),
+			Quantity: ptrInt(qty),
 		})
 	}
-	return &result
+	return result
+}
+
+func buildCoinHistory(operations []model.Operation, currentUserID int) *schemas.CoinHistory {
+	history := &schemas.CoinHistory{
+		Received: &[]schemas.Transaction{},
+		Sent:     &[]schemas.Transaction{},
+	}
+
+	for _, op := range operations {
+		// Определяем тип операции относительно текущего пользователя
+		if op.ReceiverUserID == currentUserID {
+			*history.Received = append(*history.Received, schemas.Transaction{
+				FromUser: ptrStr(op.SenderUsername),
+				Amount:   ptrInt(op.Amount),
+			})
+		} else if op.SenderUserID == currentUserID {
+			*history.Sent = append(*history.Sent, schemas.Transaction{
+				ToUser: ptrStr(op.ReceiverUsername),
+				Amount: ptrInt(op.Amount),
+			})
+		}
+	}
+
+	return history
 }
 
 func (s Server) GetApiInfo(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value("username").(string)
 	if !ok {
-		sendError(w, http.StatusUnauthorized, "Invalid user context")
+		sendError(w, http.StatusUnauthorized, "invalid user context")
 		return
 	}
 
-	// Получаем основную информацию о пользователе
-	user, err := s.repo.GetUserByUsername(r.Context(), username)
+	user, purchases, operations, err := s.repo.GetUserInfo(r.Context(), username)
+	if err == repository.ErrMsgUserNotExist {
+		sendError(w, http.StatusInternalServerError, "user not found")
+		return
+	}
 	if err != nil {
-		sendError(w, http.StatusInternalServerError, "User not found")
+		sendError(w, http.StatusInternalServerError, "failed to get user data")
 		return
 	}
 
-	purchases, _, err := s.repo.GetUserInfo(r.Context(), user.Username)
-	if err != nil {
-		sendError(w, http.StatusInternalServerError, "Failed to get purchases and operations")
-		return
+	inventory := buildInventory(purchases)
+
+	response := schemas.InfoResponse{
+		Coins:       &user.Coins,
+		Inventory:   &inventory,
+		CoinHistory: buildCoinHistory(operations, user.UserID),
 	}
 
-	// Формируем ответ
-	response := generated.InfoResponse{
-		Coins:     &user.Coins,
-		Inventory: buildInventory(purchases),
+	// Гарантируем не-nil значения для всех полей
+	if response.Inventory == nil {
+		emptyInventory := make([]schemas.InventoryItem, 0)
+		response.Inventory = &emptyInventory
 	}
 
 	respondJSON(w, http.StatusOK, response)

@@ -10,7 +10,7 @@ import (
 type Repository interface {
 	BuyItem(ctx context.Context, username, productName string) error
 	GetUserByUsername(ctx context.Context, username string) (*model.User, error)
-	GetUserInfo(ctx context.Context, username string) ([]model.Purchase, []model.Operation, error)
+	GetUserInfo(ctx context.Context, username string) (*model.User, []model.Purchase, []model.Operation, error)
 	SendCoins(ctx context.Context, fromUser, toUser string, amount int) error
 	PostAuthUser(ctx context.Context, username, password string) (*string, error)
 }

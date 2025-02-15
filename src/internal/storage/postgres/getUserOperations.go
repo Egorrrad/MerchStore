@@ -7,9 +7,24 @@ import (
 
 func (p *Storage) GetUserOperations(ctx context.Context, userID int) ([]model.Operation, error) {
 	query := `
-		SELECT operation_id, sender_user_id, u.username as sender_name, receiver_user_id, u2.username as receiver_name , amount, operation_date
-		FROM operations LEFT JOIN users u on u.user_id = operations.receiver_user_id LEFT JOIN users u2 on u2.user_id = operations.sender_user_id
-		WHERE sender_user_id = $1 OR receiver_user_id = $1`
+        SELECT 
+            o.operation_id,
+            o.sender_user_id,
+            sender.username AS sender_username,
+            o.receiver_user_id,
+            receiver.username AS receiver_username,
+            o.amount,
+            o.operation_date
+        FROM operations o
+        INNER JOIN users sender 
+            ON sender.user_id = o.sender_user_id
+        INNER JOIN users receiver 
+            ON receiver.user_id = o.receiver_user_id
+        WHERE 
+            o.sender_user_id = $1 
+            OR o.receiver_user_id = $1
+        ORDER BY o.operation_date DESC`
+
 	rows, err := p.DB.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
@@ -18,12 +33,20 @@ func (p *Storage) GetUserOperations(ctx context.Context, userID int) ([]model.Op
 
 	var operations []model.Operation
 	for rows.Next() {
-		var o model.Operation
-		err = rows.Scan(&o.OperationID, &o.SenderUserID, &o.SenderUsername, &o.ReceiverUserID, &o.ReceiverUsername, &o.Amount, &o.OperationDate)
+		var op model.Operation
+		err = rows.Scan(
+			&op.OperationID,
+			&op.SenderUserID,
+			&op.SenderUsername,
+			&op.ReceiverUserID,
+			&op.ReceiverUsername,
+			&op.Amount,
+			&op.OperationDate,
+		)
 		if err != nil {
 			return nil, err
 		}
-		operations = append(operations, o)
+		operations = append(operations, op)
 	}
 
 	if err = rows.Err(); err != nil {
