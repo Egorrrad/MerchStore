@@ -1,47 +1,31 @@
 package auth
 
 import (
-	"errors"
+	"MerchStore/src/cmd"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Секретный ключ (в проде лучше хранить в .env)
-var secretKey = []byte("supersecretkey")
+var cfg, _ = cmd.Load()
 
-// Claims структура для хранения данных в токене
-type Claims struct {
-	Username string `json:"username"`
-	jwt.RegisteredClaims
-}
-
-// Генерация JWT-токена
-func GenerateJWT(username string) (string, error) {
-	claims := Claims{
-		Username: username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)), // 3 дня
-		},
+func GenerateRefreshToken(userID int, username string) (string, error) {
+	secret := cfg.Service.SecretKey
+	claims := jwt.MapClaims{
+		"user_id":  userID,
+		"username": username,
+		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretKey)
+	return token.SignedString([]byte(secret))
 }
 
-// Проверка и разбор токена
-func ValidateJWT(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+func ParseRefreshToken(tokenString, secret string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
 	})
-	if err != nil {
+	if err != nil || !token.Valid {
 		return nil, err
 	}
-
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
-	}
-
-	return claims, nil
+	return token.Claims.(jwt.MapClaims), nil
 }

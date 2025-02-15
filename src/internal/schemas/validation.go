@@ -1,17 +1,8 @@
 package schemas
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
-)
-
-var (
-	ErrRequired      = errors.New("is required")
-	ErrMinLength     = errors.New("too short")
-	ErrMaxLength     = errors.New("too long")
-	ErrInvalidChars  = errors.New("contains invalid characters")
-	ErrInvalidAmount = errors.New("invalid amount")
 )
 
 type FieldError struct {
@@ -23,33 +14,32 @@ func (e FieldError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Field, e.Message)
 }
 
-// ValidateAuthRequest проверяет структуру AuthRequest
 func ValidateAuthRequest(username, password string) []FieldError {
-	var errors []FieldError
+	var fieldErrors []FieldError
 
 	// Валидация username
 	if username == "" {
-		errors = append(errors, FieldError{"username", ErrRequired.Error()})
+		fieldErrors = append(fieldErrors, FieldError{"username", ErrRequired.Error()})
 	} else {
 		if len(username) < 3 {
-			errors = append(errors, FieldError{"username", ErrMinLength.Error()})
+			fieldErrors = append(fieldErrors, FieldError{"username", ErrMinLength.Error()})
 		}
 		if len(username) > 50 {
-			errors = append(errors, FieldError{"username", ErrMaxLength.Error()})
+			fieldErrors = append(fieldErrors, FieldError{"username", ErrMaxLength.Error()})
 		}
 		if !isAlphanumeric(username) {
-			errors = append(errors, FieldError{"username", ErrInvalidChars.Error()})
+			fieldErrors = append(fieldErrors, FieldError{"username", ErrInvalidChars.Error()})
 		}
 	}
 
 	// Валидация password
 	if password == "" {
-		errors = append(errors, FieldError{"password", ErrRequired.Error()})
+		fieldErrors = append(fieldErrors, FieldError{"password", ErrRequired.Error()})
 	} else if len(password) < 6 {
-		errors = append(errors, FieldError{"password", ErrMinLength.Error()})
+		fieldErrors = append(fieldErrors, FieldError{"password", ErrMinLength.Error()})
 	}
 
-	return errors
+	return fieldErrors
 }
 
 // ValidateSendCoinRequest проверяет структуру SendCoinRequest

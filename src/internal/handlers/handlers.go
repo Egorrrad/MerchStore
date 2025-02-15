@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"MerchStore/src/internal/datastorage/model"
+	"MerchStore/src/internal/storage/model"
 	"context"
 	"encoding/json"
 	"net/http"

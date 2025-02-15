@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"MerchStore/src/internal/datastorage/model"
+	"MerchStore/src/internal/storage/model"
 	"context"
 )
 

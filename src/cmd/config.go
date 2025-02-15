@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"github.com/caarlos0/env/v9"
-	"time"
 )
 
 type Config struct {
-	ServerPort string `env:"SERVER_PORT,required"`
-	Database   DatabaseConfig
+	Service  ServiceConfig
+	Database DatabaseConfig
+	Cache    CacheConfig
 }
 
 type DatabaseConfig struct {
@@ -18,17 +18,24 @@ type DatabaseConfig struct {
 	Name     string `env:"DATABASE_NAME,required"`
 }
 
+type CacheConfig struct {
+	Host string `env:"CACHE_HOST,required"`
+	Port string `env:"CACHE_PORT,required"`
+}
+
+type ServiceConfig struct {
+	ServerPort string `env:"SERVER_PORT,required"`
+	LogLevel   string `env:"LOG_LEVEL,required"`
+	SecretKey  string `env:"SECRET_KEY,required"`
+}
+
 func Load() (*Config, error) {
 	cfg := Config{}
 
 	err := env.Parse(&cfg)
-	cfg.ServerPort = ":" + cfg.ServerPort
+	cfg.Service.ServerPort = ":" + cfg.Service.ServerPort
 	if err != nil {
 		return nil, err
 	}
 	return &cfg, nil
 }
-
-var JWTSecret = []byte("your-secret-key") // Лучше загружать из ENV
-
-const TokenExpiration = time.Hour * 24 // 24 часа

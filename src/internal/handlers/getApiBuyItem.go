@@ -14,7 +14,7 @@ func (s Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item strin
 		return
 	}
 
-	username := r.Context().Value("user").(string)
+	username := r.Context().Value("username").(string)
 
 	// Выполняем покупку
 	err := s.repo.BuyItem(r.Context(), username, item)

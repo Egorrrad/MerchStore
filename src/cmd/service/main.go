@@ -4,15 +4,17 @@ package main
 
 import (
 	"MerchStore/src/cmd"
-	"MerchStore/src/internal/datastorage"
-	"MerchStore/src/internal/datastorage/postgres"
 	"MerchStore/src/internal/generated"
 	"MerchStore/src/internal/handlers"
+	"MerchStore/src/internal/logger"
 	"MerchStore/src/internal/middleware"
 	"MerchStore/src/internal/repository"
+	"MerchStore/src/internal/storage"
+	"MerchStore/src/internal/storage/postgres"
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,47 +23,49 @@ import (
 )
 
 func main() {
-
-	config, err := cmd.Load()
+	cfg, err := cmd.Load()
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
+	logger.Init(cfg.Service.LogLevel)
+	slog.Info("Starting server...")
 
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.Database.Host,
-		config.Database.Port,
-		config.Database.User,
-		config.Database.Password,
-		config.Database.Name,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Name,
 	)
-
-	store, db := datastorage.NewDataStorage(dsn)
+	store, db := storage.NewDataStorage(dsn)
 	defer postgres.CloseDB(db)
 
-	resp := repository.NewRepository(store)
+	redisAdr := fmt.Sprintf("%s:%s", cfg.Cache.Host, cfg.Cache.Port)
+	redisRepo := storage.NewCacheStorage(redisAdr)
+	resp := repository.NewRepository(store, redisRepo)
 	server := handlers.NewServer(resp)
 
 	// Создаем опции с middleware
 	options := generated.StdHTTPServerOptions{
 		Middlewares: []generated.MiddlewareFunc{
-			middleware.JWTMiddleware,
+			middleware.AuthMiddleware(resp, cfg.Service.SecretKey),
+			middleware.LoggingMiddleware,
 		},
 	}
 
-	// Передаем опции в HandlerWithOptions
 	h := generated.HandlerWithOptions(server, options)
 
 	s := &http.Server{
-		Addr:    config.ServerPort,
+		Addr:    cfg.Service.ServerPort,
 		Handler: h,
 	}
 
 	// Start server in a new goroutine
 	go func() {
-		log.Printf("Service started on port %s", config.ServerPort)
+		slog.Info(fmt.Sprintf("Service started on port %s", cfg.Service.ServerPort))
 		if err = s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Printf("Error while starting server: %v", err)
+			slog.Info(fmt.Sprintf("Error while starting server: %v", err))
 		}
 	}()
 
@@ -75,7 +79,7 @@ func main() {
 	defer cancel()
 
 	if err = s.Shutdown(ctx); err != nil {
-		log.Printf("Error during server shutdown: %v", err)
+		slog.Info(fmt.Sprintf("Error during server shutdown: %v", err))
 	}
-	log.Println("Server gracefully stopped")
+	slog.Info(fmt.Sprintln("Server gracefully stopped"))
 }

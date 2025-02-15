@@ -16,9 +16,8 @@ type CoinHistory struct {
 	Sent     *[]Transaction `json:"sent,omitempty"`
 }
 
-// InfoResponse defines model for InfoResponse.
 type InfoResponse struct {
-	CoinHistory *CoinHistory     `json:"coinHistory,omitempty"`
 	Coins       *int             `json:"coins,omitempty"`
+	CoinHistory *CoinHistory     `json:"coinHistory,omitempty"`
 	Inventory   *[]InventoryItem `json:"inventory,omitempty"`
 }

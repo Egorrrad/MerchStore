@@ -23,7 +23,7 @@ func (s Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sender := r.Context().Value("user").(string)
+	sender := r.Context().Value("username").(string)
 
 	// Выполняем перевод
 	if err := s.repo.SendCoins(r.Context(), sender, req.ToUser, req.Amount); err != nil {

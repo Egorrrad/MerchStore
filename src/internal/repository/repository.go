@@ -1,15 +1,17 @@
 package repository
 
 import (
-	"MerchStore/src/internal/datastorage"
+	"MerchStore/src/internal/storage"
 )
 
 type Repository struct {
-	storage datastorage.DataStorage
+	storage storage.DataStorage
+	cache   storage.CacheStorage
 }
 
-func NewRepository(storage datastorage.DataStorage) Repository {
+func NewRepository(storage storage.DataStorage, cache storage.CacheStorage) Repository {
 	return Repository{
 		storage: storage,
+		cache:   cache,
 	}
 }

@@ -28,23 +28,23 @@ INSERT INTO products (name, price) VALUES
 
 CREATE TABLE purchases (
                             purchase_id SERIAL PRIMARY KEY,
-                            user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-                            product_id INT REFERENCES products(product_id) ON DELETE CASCADE,
+                            user_id INT REFERENCES users(user_id),
+                            product_id INT REFERENCES products(product_id),
                             quantity INT NOT NULL,
                             operation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE operations (
                             operation_id SERIAL PRIMARY KEY,
-                            sender_user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-                            receiver_user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+                            sender_user_id INT REFERENCES users(user_id),
+                            receiver_user_id INT REFERENCES users(user_id),
                             amount INT NOT NULL,
                             operation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE refresh_tokens (
                                 token_id SERIAL PRIMARY KEY,
-                                user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+                                user_id INT REFERENCES users(user_id),
                                 token VARCHAR(255) NOT NULL,
                                 expires_at TIMESTAMP NOT NULL,
                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

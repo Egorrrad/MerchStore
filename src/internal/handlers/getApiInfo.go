@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"MerchStore/src/internal/datastorage/model"
 	"MerchStore/src/internal/generated"
+	"MerchStore/src/internal/storage/model"
 	"net/http"
 )
 
@@ -35,7 +35,7 @@ func buildInventory(purchases []model.Purchase) *[]struct {
 }
 
 func (s Server) GetApiInfo(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value("user").(string)
+	username, ok := r.Context().Value("username").(string)
 	if !ok {
 		sendError(w, http.StatusUnauthorized, "Invalid user context")
 		return
