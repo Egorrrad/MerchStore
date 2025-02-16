@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -21,6 +22,10 @@ import (
 // Declare a global variable to hold the Docker pool and resource.
 var (
 	network *dockertest.Network
+)
+
+const (
+	baseURL = "http://localhost:8090"
 )
 
 func TestMain(m *testing.M) {
@@ -122,9 +127,15 @@ func deployRedis(pool *dockertest.Pool) (*dockertest.Resource, error) {
 
 	return resource, nil
 }
+func getInitSQLPath() string {
+	_, filename, _, _ := runtime.Caller(0)
+	rootDir := filepath.Join(filepath.Dir(filename), "..", "..", "..")
+	return filepath.Join(rootDir, "migrations", "init.sql")
+}
 
 // PostgreSQL на порту 5440
 func deployPostgres(pool *dockertest.Pool) (*dockertest.Resource, error) {
+	migrationPath := getInitSQLPath()
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Hostname:     "postgres",
 		Repository:   "postgres",
@@ -138,6 +149,9 @@ func deployPostgres(pool *dockertest.Pool) (*dockertest.Resource, error) {
 			"POSTGRES_USER=postgres",
 			"POSTGRES_PASSWORD=password",
 			"POSTGRES_DB=shop",
+		},
+		Mounts: []string{
+			fmt.Sprintf("%s:/docker-entrypoint-initdb.d/init.sql", migrationPath),
 		},
 	})
 	if err != nil {
