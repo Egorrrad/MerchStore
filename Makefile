@@ -11,3 +11,10 @@ test-cov:
 	go test -coverprofile=coverage.out ./... & go tool cover -html=coverage.out
 test-load:
 	k6 run ./src/test/load_test.js
+
+# Линтинг
+lint:
+	golangci-lint run ./... --config .golangci.yml
+
+lint-fix:
+	golangci-lint run ./... --config .golangci.yml --fix

@@ -36,7 +36,7 @@ func OpenDB(dsn string) (*Storage, error) {
 		}
 
 		// Успешное подключение
-		slog.Info(fmt.Sprintf("Подключение к БД успешно!"))
+		slog.Info("Подключение к БД успешно!")
 		store := &Storage{}
 		store.DB = db
 		return store, nil

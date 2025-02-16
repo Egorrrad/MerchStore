@@ -1,7 +1,81 @@
+# Конфигурация для golangci-lint
+# Документация: https://golangci-lint.run/
+
 run:
+  # Таймаут выполнения линтера
   timeout: 5m
+  
+  # Режим загрузки модулей (только чтение)
+  modules-download-mode: readonly
 
 linters:
+  # Отключаем все линтеры по умолчанию
+  disable-all: true
+  
+  # Включаем только нужные линтеры
   enable:
+    # Базовые линтеры
+    - govet
+    - errcheck
+    - staticcheck
+    - revive
+
+    # Безопасность
+    - gosec
+
+    # Работа с PostgreSQL
     - sqlclosecheck
-    - gofmt
+    - rowserrcheck
+
+    # Качество кода
+    - bodyclose
+    - unconvert
+    - prealloc
+    - goconst
+
+    # Работа с Redis и контекстами
+    - nilerr
+    - noctx
+    - contextcheck
+
+linters-settings:
+  # Настройки для staticcheck
+  staticcheck:
+    checks:
+      - "-SA5011"
+      - "-SA5012"
+
+  # Настройки для gosec (security checks)
+  gosec:
+    includes:
+      - "G101"
+      - "G201"
+      - "G202"
+    excludes:
+      - "G104"
+
+
+  # Настройки для govet
+  govet:
+    settings:
+      printf:
+        # Разрешаем форматирование для методов testing.T
+        funcs:
+          - "(*testing.T).Logf"
+          - "(*testing.T).Errorf"
+          - "(*testing.T).Fatalf"
+
+issues:
+  # Глобальные исключения
+  exclude-rules:
+    # Игнорировать предупреждения о возможных nil-указателях в тестовых файлах
+    - path: _test\.go
+      linters:
+        - staticcheck
+      text: "possible nil pointer dereference"
+
+    # Игнорировать "Error return value is not checked" в тестах
+    - path: _test\.go
+      linters:
+        - errcheck
+      text: "Error return value of .* is not checked"

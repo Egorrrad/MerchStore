@@ -3,6 +3,7 @@ package e2e
 import (
 	"MerchStore/src/cmd"
 	"MerchStore/src/test"
+	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"log"
 	"os"
