@@ -8,9 +8,9 @@ import (
 )
 
 func (r Repository) PostAuthUser(ctx context.Context, username, password string) (*string, error) {
-	user, err := r.storage.GetUserByUsername(ctx, username)
+	user, err := r.Storage.GetUserByUsername(ctx, username)
 	if err != nil && err == sql.ErrNoRows {
-		err1 := r.storage.AddUser(ctx, username, password, "user")
+		err1 := r.Storage.AddUser(ctx, username, password, "user")
 		if err1 != nil {
 			return nil, err1
 		}
@@ -19,7 +19,7 @@ func (r Repository) PostAuthUser(ctx context.Context, username, password string)
 	}
 	var userID int
 	if user == nil {
-		user, err = r.storage.GetUserByUsername(ctx, username)
+		user, err = r.Storage.GetUserByUsername(ctx, username)
 		if err != nil {
 			return nil, err
 		}

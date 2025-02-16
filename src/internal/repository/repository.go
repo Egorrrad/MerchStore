@@ -5,13 +5,13 @@ import (
 )
 
 type Repository struct {
-	storage storage.DataStorage
-	cache   storage.CacheStorage
+	Storage storage.DataStorage
+	Cache   storage.CacheStorage
 }
 
 func NewRepository(storage storage.DataStorage, cache storage.CacheStorage) Repository {
 	return Repository{
-		storage: storage,
-		cache:   cache,
+		Storage: storage,
+		Cache:   cache,
 	}
 }

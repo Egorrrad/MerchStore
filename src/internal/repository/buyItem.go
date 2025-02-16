@@ -5,12 +5,12 @@ import (
 )
 
 func (r Repository) BuyItem(ctx context.Context, username, productName string) error {
-	user, err := r.storage.GetUserByUsername(ctx, username)
+	user, err := r.Storage.GetUserByUsername(ctx, username)
 	if err != nil {
 		return err
 	}
 
-	product, err := r.storage.GetProduct(ctx, productName)
+	product, err := r.Storage.GetProduct(ctx, productName)
 	if err != nil {
 		return err
 	}
@@ -21,15 +21,15 @@ func (r Repository) BuyItem(ctx context.Context, username, productName string) e
 		return ErrMsgNotEnoughCoins
 	}
 
-	err = r.storage.UpdateUserCoins(ctx, user.UserID, user.Coins-product.Price)
+	err = r.Storage.UpdateUserCoins(ctx, user.UserID, user.Coins-product.Price)
 	if err != nil {
 		return err
 	}
-	err = r.storage.UpdateProductQuantity(ctx, product.ProductID, product.Quantity-1)
+	err = r.Storage.UpdateProductQuantity(ctx, product.ProductID, product.Quantity-1)
 	if err != nil {
 		return err
 	}
-	err = r.storage.AddPurchase(ctx, user.UserID, product.ProductID, 1)
+	err = r.Storage.AddPurchase(ctx, user.UserID, product.ProductID, 1)
 	if err != nil {
 		return err
 	}

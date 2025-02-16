@@ -15,12 +15,12 @@ func (r Repository) GetUserInfo(ctx context.Context, username string) (
 		return nil, nil, nil, ErrMsgUserNotExist
 	}
 
-	purchases, err := r.storage.GetUserPurchases(ctx, user.UserID)
+	purchases, err := r.Storage.GetUserPurchases(ctx, user.UserID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	operations, err := r.storage.GetUserOperations(ctx, user.UserID)
+	operations, err := r.Storage.GetUserOperations(ctx, user.UserID)
 	if err != nil {
 		return nil, nil, nil, err
 	}

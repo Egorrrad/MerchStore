@@ -1,0 +1,72 @@
+package mocks
+
+import (
+	"MerchStore/src/internal/storage/model"
+	"context"
+	"github.com/stretchr/testify/mock"
+	"time"
+)
+
+type MockStorage struct {
+	mock.Mock
+}
+
+func (m *MockStorage) AddUser(ctx context.Context, username, passwordHash, role string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockStorage) AddOperation(ctx context.Context, senderID, resieverID, amount int) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockStorage) GetUserOperations(ctx context.Context, userID int) ([]model.Operation, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockStorage) GetUserPurchases(ctx context.Context, userID int) ([]model.Purchase, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockStorage) SaveRefreshToken(ctx context.Context, userID int, token string, expiresAt time.Time) error {
+	args := m.Called(ctx, userID, token, expiresAt)
+	return args.Error(0)
+}
+
+func (m *MockStorage) GetRefreshToken(ctx context.Context, userID int, token string) (*model.RefreshToken, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockStorage) DeleteRefreshToken(ctx context.Context, userID int) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockStorage) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
+	args := m.Called(ctx, username)
+	return args.Get(0).(*model.User), args.Error(1)
+}
+
+func (m *MockStorage) GetProduct(ctx context.Context, productName string) (*model.Product, error) {
+	args := m.Called(ctx, productName)
+	return args.Get(0).(*model.Product), args.Error(1)
+}
+
+func (m *MockStorage) UpdateUserCoins(ctx context.Context, userID int, coins int) error {
+	args := m.Called(ctx, userID, coins)
+	return args.Error(0)
+}
+
+func (m *MockStorage) UpdateProductQuantity(ctx context.Context, productID int, quantity int) error {
+	args := m.Called(ctx, productID, quantity)
+	return args.Error(0)
+}
+
+func (m *MockStorage) AddPurchase(ctx context.Context, userID, productID, quantity int) error {
+	args := m.Called(ctx, userID, productID, quantity)
+	return args.Error(0)
+}

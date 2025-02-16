@@ -7,7 +7,7 @@ import (
 )
 
 func (r Repository) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
-	user, err := r.storage.GetUserByUsername(ctx, username)
+	user, err := r.Storage.GetUserByUsername(ctx, username)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

@@ -6,19 +6,19 @@ import (
 
 func (r Repository) ValidateRefreshToken(ctx context.Context, userID int, token string) error {
 	// Сначала проверяем Redis
-	cachedToken, err := r.cache.GetCachedRefreshToken(ctx, userID)
+	cachedToken, err := r.Cache.GetCachedRefreshToken(ctx, userID)
 	if err == nil && cachedToken == token {
 		return nil
 	}
 
 	// Если нет в Redis, проверяем PostgreSQL
-	_, err = r.storage.GetRefreshToken(ctx, userID, token)
+	_, err = r.Storage.GetRefreshToken(ctx, userID, token)
 	if err != nil {
 		return err
 	}
 
 	// Обновляем кэш при успехе
-	err = r.cache.CacheRefreshToken(ctx, userID, token)
+	err = r.Cache.CacheRefreshToken(ctx, userID, token)
 	if err != nil {
 		return err
 	}
