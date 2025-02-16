@@ -9,3 +9,5 @@ run-tests:
 	go test -v -cover ./...
 test-cov:
 	go test -coverprofile=coverage.out ./... & go tool cover -html=coverage.out
+test-load:
+	k6 run ./src/test/load_test.js
