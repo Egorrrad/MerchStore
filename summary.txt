@@ -1,0 +1,23 @@
+     ✓ status is 200
+
+     █ setup
+
+       ✓ auth response status is 200
+
+     checks.........................: 100.00% ✓ 96972      ✗ 0    
+     data_received..................: 17 MB   57 kB/s
+     data_sent......................: 25 MB   84 kB/s
+     http_req_blocked...............: avg=7.19µs  min=0s    med=4µs    max=3.33ms   p(90)=8µs    p(95)=10µs   
+     http_req_connecting............: avg=1.77µs  min=0s    med=0s     max=1.98ms   p(90)=0s     p(95)=0s     
+   ✗ http_req_duration..............: avg=4.59ms  min=844µs med=2.01ms max=217.3ms  p(90)=7.98ms p(95)=12.78ms
+       { expected_response:true }...: avg=4.59ms  min=844µs med=2.01ms max=217.3ms  p(90)=7.98ms p(95)=12.78ms
+   ✓ http_req_failed................: 0.00%   ✓ 0          ✗ 96972
+     http_req_receiving.............: avg=32.54µs min=5µs   med=24µs   max=8.53ms   p(90)=54µs   p(95)=70µs   
+     http_req_sending...............: avg=15.13µs min=2µs   med=11µs   max=21.87ms  p(90)=24µs   p(95)=31µs   
+     http_req_tls_handshaking.......: avg=0s      min=0s    med=0s     max=0s       p(90)=0s     p(95)=0s     
+     http_req_waiting...............: avg=4.55ms  min=818µs med=1.96ms max=217.26ms p(90)=7.9ms  p(95)=12.71ms
+     http_reqs......................: 96972   321.013601/s
+     iteration_duration.............: avg=1s      min=1s    med=1s     max=1.21s    p(90)=1s     p(95)=1.01s  
+     iterations.....................: 96472   319.358413/s
+     vus............................: 1       min=0        max=500
+     vus_max........................: 500     min=500      max=500
