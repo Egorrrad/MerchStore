@@ -1,7 +1,6 @@
-package tests
+package repository
 
 import (
-	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/storage/mocks"
 	"context"
 	"errors"
@@ -13,7 +12,7 @@ import (
 func TestSaveRefreshToken_Success(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
 	mockCache := new(mocks.MockCache)
-	repo := repository.Repository{Storage: mockStorage, Cache: mockCache}
+	repo := Repository{Storage: mockStorage, Cache: mockCache}
 	ctx := context.Background()
 
 	token := "test_token"
@@ -32,7 +31,7 @@ func TestSaveRefreshToken_Success(t *testing.T) {
 func TestSaveRefreshToken_StorageError(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
 	mockCache := new(mocks.MockCache)
-	repo := repository.Repository{Storage: mockStorage, Cache: mockCache}
+	repo := Repository{Storage: mockStorage, Cache: mockCache}
 	ctx := context.Background()
 
 	token := "test_token"
@@ -50,7 +49,7 @@ func TestSaveRefreshToken_StorageError(t *testing.T) {
 func TestSaveRefreshToken_CacheError(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
 	mockCache := new(mocks.MockCache)
-	repo := repository.Repository{Storage: mockStorage, Cache: mockCache}
+	repo := Repository{Storage: mockStorage, Cache: mockCache}
 	ctx := context.Background()
 
 	token := "test_token"

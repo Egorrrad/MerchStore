@@ -1,7 +1,6 @@
-package tests
+package repository
 
 import (
-	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/storage/mocks"
 	"MerchStore/src/internal/storage/model"
 	"context"
@@ -12,7 +11,7 @@ import (
 
 func TestBuyItem_Success(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
-	repo := repository.Repository{Storage: mockStorage}
+	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 100}
@@ -31,7 +30,7 @@ func TestBuyItem_Success(t *testing.T) {
 
 func TestBuyItem_UserNotFound(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
-	repo := repository.Repository{Storage: mockStorage}
+	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	mockStorage.On("GetUserByUsername", ctx, "testuser").Return(&model.User{}, errors.New("user not found"))
@@ -43,7 +42,7 @@ func TestBuyItem_UserNotFound(t *testing.T) {
 
 func TestBuyItem_ProductNotFound(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
-	repo := repository.Repository{Storage: mockStorage}
+	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 100}
@@ -57,7 +56,7 @@ func TestBuyItem_ProductNotFound(t *testing.T) {
 
 func TestBuyItem_OutOfStock(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
-	repo := repository.Repository{Storage: mockStorage}
+	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 100}
@@ -68,12 +67,12 @@ func TestBuyItem_OutOfStock(t *testing.T) {
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Equal(t, repository.ErrMsgOutOfStock, err)
+	assert.Equal(t, ErrMsgOutOfStock, err)
 }
 
 func TestBuyItem_NotEnoughCoins(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
-	repo := repository.Repository{Storage: mockStorage}
+	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 30}
@@ -84,5 +83,5 @@ func TestBuyItem_NotEnoughCoins(t *testing.T) {
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Equal(t, repository.ErrMsgNotEnoughCoins, err)
+	assert.Equal(t, ErrMsgNotEnoughCoins, err)
 }
