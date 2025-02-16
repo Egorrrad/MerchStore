@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"MerchStore/src/internal/storage/model"
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -11,6 +13,21 @@ import (
 
 type Storage struct {
 	DB *sql.DB
+}
+
+type StorageTx struct {
+	tx *sql.Tx
+}
+
+type Tx interface {
+	GetUserForUpdate(ctx context.Context, username string) (*model.User, error)
+	GetProductForUpdate(ctx context.Context, productName string) (*model.Product, error)
+	UpdateUserCoins(ctx context.Context, userID int, newAmount int) error
+	UpdateProductQuantity(ctx context.Context, productID int, quantity int) error
+	AddOperation(ctx context.Context, from, to int, amount int) error
+	AddPurchase(ctx context.Context, userID, productID, quantity int) error
+	Commit() error
+	Rollback() error
 }
 
 var MaxRetries = 5

@@ -9,4 +9,6 @@ var (
 	ErrMsgProductNotExist = errors.New("product not exist")
 	ErrMsgTokenGenFailed  = errors.New("token generation failed")
 	ErrMsgTokenSaveFailed = errors.New("failed to save token")
+	ErrMsgSentToSelf      = errors.New("user can't coin to self")
+	ErrMsgInvalidAmount   = errors.New("invalid amount")
 )

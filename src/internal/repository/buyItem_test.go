@@ -11,77 +11,129 @@ import (
 
 func TestBuyItem_Success(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
+	mockTx := new(mocks.MockTransaction)
 	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 100}
 	product := model.Product{ProductID: 1, Name: "item1", Price: 50, Quantity: 10}
 
-	mockStorage.On("GetUserByUsername", ctx, "testuser").Return(&user, nil)
-	mockStorage.On("GetProduct", ctx, "item1").Return(&product, nil)
-	mockStorage.On("UpdateUserCoins", ctx, user.UserID, 50).Return(nil)
-	mockStorage.On("UpdateProductQuantity", ctx, product.ProductID, 9).Return(nil)
-	mockStorage.On("AddPurchase", ctx, user.UserID, product.ProductID, 1).Return(nil)
+	// Мокаем BeginTx.
+	mockStorage.On("BeginTx", ctx).Return(mockTx, nil)
+
+	// Мокаем методы транзакции.
+	mockTx.On("GetUserForUpdate", ctx, "testuser").Return(&user, nil)
+	mockTx.On("GetProductForUpdate", ctx, "item1").Return(&product, nil)
+	mockTx.On("UpdateUserCoins", ctx, user.UserID, 50).Return(nil)
+	mockTx.On("UpdateProductQuantity", ctx, product.ProductID, 9).Return(nil)
+	mockTx.On("AddPurchase", ctx, user.UserID, product.ProductID, 1).Return(nil)
+	mockTx.On("Commit").Return(nil) // Ожидаем Commit.
+	// Не добавляем Rollback, так как он не должен вызываться в успешном сценарии.
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.NoError(t, err)
+
+	// Проверяем, что все методы были вызваны.
 	mockStorage.AssertExpectations(t)
+	mockTx.AssertExpectations(t)
 }
 
 func TestBuyItem_UserNotFound(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
+	mockTx := new(mocks.MockTransaction)
 	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
-	mockStorage.On("GetUserByUsername", ctx, "testuser").Return(&model.User{}, errors.New("user not found"))
+	// Мокаем BeginTx.
+	mockStorage.On("BeginTx", ctx).Return(mockTx, nil)
+
+	// Мокаем GetUserForUpdate с ошибкой.
+	mockTx.On("GetUserForUpdate", ctx, "testuser").Return(&model.User{}, errors.New("user not found"))
+	mockTx.On("Rollback").Return(nil) // Ожидаем Rollback, так как будет ошибка.
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Equal(t, "user not found", err.Error())
+	assert.Contains(t, err.Error(), "get user error") // Проверяем, что ошибка содержит текст "get user error".
+
+	// Проверяем, что все методы были вызваны.
+	mockStorage.AssertExpectations(t)
+	mockTx.AssertExpectations(t)
 }
 
 func TestBuyItem_ProductNotFound(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
+	mockTx := new(mocks.MockTransaction)
 	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 100}
-	mockStorage.On("GetUserByUsername", ctx, "testuser").Return(&user, nil)
-	mockStorage.On("GetProduct", ctx, "item1").Return(&model.Product{}, errors.New("product not found"))
+
+	// Мокаем BeginTx.
+	mockStorage.On("BeginTx", ctx).Return(mockTx, nil)
+
+	// Мокаем GetUserForUpdate.
+	mockTx.On("GetUserForUpdate", ctx, "testuser").Return(&user, nil)
+
+	// Мокаем GetProductForUpdate с ошибкой.
+	mockTx.On("GetProductForUpdate", ctx, "item1").Return(&model.Product{}, errors.New("product not found"))
+	mockTx.On("Rollback").Return(nil) // Ожидаем Rollback, так как будет ошибка.
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Equal(t, "product not found", err.Error())
-}
+	assert.Contains(t, err.Error(), "get product error") // Проверяем, что ошибка содержит текст "get product error".
 
+	// Проверяем, что все методы были вызваны.
+	mockStorage.AssertExpectations(t)
+	mockTx.AssertExpectations(t)
+}
 func TestBuyItem_OutOfStock(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
+	mockTx := new(mocks.MockTransaction)
 	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
 	user := model.User{UserID: 1, Username: "testuser", Coins: 100}
-	product := model.Product{ProductID: 1, Name: "item1", Price: 50, Quantity: 0}
+	product := model.Product{ProductID: 1, Name: "item1", Price: 50, Quantity: 0} // Товара нет в наличии.
 
-	mockStorage.On("GetUserByUsername", ctx, "testuser").Return(&user, nil)
-	mockStorage.On("GetProduct", ctx, "item1").Return(&product, nil)
+	// Мокаем BeginTx.
+	mockStorage.On("BeginTx", ctx).Return(mockTx, nil)
+
+	// Мокаем GetUserForUpdate и GetProductForUpdate.
+	mockTx.On("GetUserForUpdate", ctx, "testuser").Return(&user, nil)
+	mockTx.On("GetProductForUpdate", ctx, "item1").Return(&product, nil)
+	mockTx.On("Rollback").Return(nil) // Ожидаем Rollback, так как будет ошибка.
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Equal(t, ErrMsgOutOfStock, err)
+	assert.Equal(t, ErrMsgOutOfStock, err) // Проверяем, что возвращается ошибка "out of stock".
+
+	// Проверяем, что все методы были вызваны.
+	mockStorage.AssertExpectations(t)
+	mockTx.AssertExpectations(t)
 }
 
 func TestBuyItem_NotEnoughCoins(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
+	mockTx := new(mocks.MockTransaction)
 	repo := Repository{Storage: mockStorage}
 	ctx := context.Background()
 
-	user := model.User{UserID: 1, Username: "testuser", Coins: 30}
+	user := model.User{UserID: 1, Username: "testuser", Coins: 30} // Недостаточно монет.
 	product := model.Product{ProductID: 1, Name: "item1", Price: 50, Quantity: 10}
 
-	mockStorage.On("GetUserByUsername", ctx, "testuser").Return(&user, nil)
-	mockStorage.On("GetProduct", ctx, "item1").Return(&product, nil)
+	// Мокаем BeginTx.
+	mockStorage.On("BeginTx", ctx).Return(mockTx, nil)
+
+	// Мокаем GetUserForUpdate и GetProductForUpdate.
+	mockTx.On("GetUserForUpdate", ctx, "testuser").Return(&user, nil)
+	mockTx.On("GetProductForUpdate", ctx, "item1").Return(&product, nil)
+	mockTx.On("Rollback").Return(nil) // Ожидаем Rollback, так как будет ошибка.
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Equal(t, ErrMsgNotEnoughCoins, err)
+	assert.Equal(t, ErrMsgNotEnoughCoins, err) // Проверяем, что возвращается ошибка "not enough coins".
+
+	// Проверяем, что все методы были вызваны.
+	mockStorage.AssertExpectations(t)
+	mockTx.AssertExpectations(t)
 }
