@@ -9,13 +9,15 @@ import (
 	"time"
 )
 
+const testToken = "test_token"
+
 func TestSaveRefreshToken_Success(t *testing.T) {
 	mockStorage := new(mocks.MockStorage)
 	mockCache := new(mocks.MockCache)
 	repo := Repository{Storage: mockStorage, Cache: mockCache}
 	ctx := context.Background()
 
-	token := "test_token"
+	token := testToken
 	expiresAt := time.Now().Add(24 * time.Hour)
 	userID := 1
 
@@ -34,7 +36,7 @@ func TestSaveRefreshToken_StorageError(t *testing.T) {
 	repo := Repository{Storage: mockStorage, Cache: mockCache}
 	ctx := context.Background()
 
-	token := "test_token"
+	token := testToken
 	expiresAt := time.Now().Add(24 * time.Hour)
 	userID := 1
 
@@ -52,7 +54,7 @@ func TestSaveRefreshToken_CacheError(t *testing.T) {
 	repo := Repository{Storage: mockStorage, Cache: mockCache}
 	ctx := context.Background()
 
-	token := "test_token"
+	token := testToken
 	expiresAt := time.Now().Add(24 * time.Hour)
 	userID := 1
 

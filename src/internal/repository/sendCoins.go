@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log"
 )
 
 func (r Repository) SendCoins(ctx context.Context, fromUser, toUser string, amount int) error {
@@ -24,7 +25,9 @@ func (r Repository) SendCoins(ctx context.Context, fromUser, toUser string, amou
 	committed := false
 	defer func() {
 		if !committed {
-			tx.Rollback() // Вызываем Rollback, только если не было Commit.
+			if err := tx.Rollback(); err != nil {
+				log.Printf("Transaction rollback error: %v", err)
+			} // Вызываем Rollback, только если не было Commit.
 		}
 	}()
 

@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+const usernameKey string = "username"
+
 // AuthMiddleware возвращает middleware для проверки JWT-токена.
 func AuthMiddleware(repo repository.Repository, secretKey string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -46,7 +48,7 @@ func AuthMiddleware(repo repository.Repository, secretKey string) func(http.Hand
 
 			// Сохраняем username в контекст
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, "username", username)
+			ctx = context.WithValue(ctx, usernameKey, username)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log"
 )
 
 func (r Repository) BuyItem(ctx context.Context, username, productName string) error {
@@ -15,7 +16,9 @@ func (r Repository) BuyItem(ctx context.Context, username, productName string) e
 	committed := false
 	defer func() {
 		if !committed {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				log.Printf("Rollback failed: %v", err)
+			}
 		}
 	}()
 

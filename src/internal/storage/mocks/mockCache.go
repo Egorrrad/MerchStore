@@ -9,7 +9,7 @@ type MockCache struct {
 	mock.Mock
 }
 
-func (m *MockCache) GetCachedRefreshToken(ctx context.Context, userID int) (string, error) {
+func (m *MockCache) GetCachedRefreshToken(_ context.Context, _ int) (string, error) {
 	//TODO implement me
 	panic("implement me")
 }

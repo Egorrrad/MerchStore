@@ -39,7 +39,11 @@ func main() {
 		cfg.Database.Name,
 	)
 	store, db := storage.NewDataStorage(dsn)
-	defer postgres.CloseDB(db)
+	defer func() {
+		if err := postgres.CloseDB(db); err != nil {
+			slog.Error("Database closure error", "error", err)
+		}
+	}()
 
 	redisAdr := fmt.Sprintf("%s:%s", cfg.Cache.Host, cfg.Cache.Port)
 	redisRepo := storage.NewCacheStorage(redisAdr)
