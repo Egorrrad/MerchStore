@@ -11,4 +11,7 @@ var (
 	ErrMsgTokenSaveFailed = errors.New("failed to save token")
 	ErrMsgSentToSelf      = errors.New("user can't coin to self")
 	ErrMsgInvalidAmount   = errors.New("invalid amount")
+	ErrMsgTokenExpired    = errors.New("token has expired")
+	ErrMsgInvalidToken    = errors.New("invalid token")
+	ErrMsgWrongPass       = errors.New("Wrong password")
 )

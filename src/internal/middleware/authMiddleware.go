@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"MerchStore/src/internal/auth"
 	"MerchStore/src/internal/repository"
 	"context"
+	"errors"
 	"net/http"
 )
 
@@ -29,26 +29,20 @@ func AuthMiddleware(repo repository.Repository, secretKey string) func(http.Hand
 				return
 			}
 
-			// Парсинг токена
-			claims, err := auth.ParseRefreshToken(token, secretKey)
+			username, err := repo.ValidateRefreshToken(r.Context(), token, secretKey)
 			if err != nil {
-				http.Error(w, "Invalid token", http.StatusUnauthorized)
-				return
-			}
-
-			// Извлекаем user_id и username из токена
-			userID := int(claims["user_id"].(float64))
-			username := claims["username"].(string)
-
-			err = repo.ValidateRefreshToken(r.Context(), userID, token)
-			if err != nil {
-				http.Error(w, "Invalid token", http.StatusUnauthorized)
+				switch {
+				case errors.Is(err, repository.ErrMsgTokenExpired):
+					http.Error(w, "Token expired", http.StatusUnauthorized)
+				default:
+					http.Error(w, "Invalid token", http.StatusUnauthorized)
+				}
 				return
 			}
 
 			// Сохраняем username в контекст
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, usernameKey, username)
+			ctx = context.WithValue(ctx, usernameKey, *username)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

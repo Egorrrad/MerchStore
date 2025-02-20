@@ -20,9 +20,10 @@ type DataStorage interface {
 	//UpdateUserCoins(ctx context.Context, userID int, coins int) error
 	//UpdateProductQuantity(ctx context.Context, productID int, quantity int) error
 	SaveRefreshToken(ctx context.Context, userID int, token string, expiresAt time.Time) error
-	GetRefreshToken(ctx context.Context, userID int, token string) (*model.RefreshToken, error)
+	GetRefreshToken(ctx context.Context, userID int) (*model.RefreshToken, error)
 	DeleteRefreshToken(ctx context.Context, userID int) error
 	BeginTx(ctx context.Context) (postgres.Tx, error)
+	UpdateRefreshToken(ctx context.Context, id int, token string, expires time.Time) error
 }
 
 func NewDataStorage(dsn string) (DataStorage, *sql.DB) {

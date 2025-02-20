@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"MerchStore/src/internal/generated"
+	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/schemas"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -21,8 +23,17 @@ func (s Server) PostApiAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token, err := s.repo.PostAuthUser(r.Context(), req.Username, req.Password)
+	switch {
+	default:
+
+	}
 	if err != nil {
-		sendError(w, http.StatusInternalServerError, "Auth failed")
+		switch {
+		case errors.Is(err, repository.ErrMsgWrongPass):
+			sendError(w, http.StatusBadRequest, "Wrong password")
+		default:
+			sendError(w, http.StatusInternalServerError, "Auth failed")
+		}
 	}
 	respondJSON(w, http.StatusOK, generated.AuthResponse{Token: token})
 }

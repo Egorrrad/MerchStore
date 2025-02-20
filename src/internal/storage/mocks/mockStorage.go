@@ -11,6 +11,12 @@ import (
 type MockStorage struct {
 	mock.Mock
 }
+
+func (m *MockStorage) UpdateRefreshToken(ctx context.Context, id int, token string, expires time.Time) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 type MockTransaction struct {
 	mock.Mock
 }
@@ -45,8 +51,8 @@ func (m *MockStorage) SaveRefreshToken(ctx context.Context, userID int, token st
 	return args.Error(0)
 }
 
-func (m *MockStorage) GetRefreshToken(ctx context.Context, userID int, token string) (*model.RefreshToken, error) {
-	args := m.Called(ctx, userID, token)
+func (m *MockStorage) GetRefreshToken(ctx context.Context, userID int) (*model.RefreshToken, error) {
+	args := m.Called(ctx, userID)
 	return args.Get(0).(*model.RefreshToken), args.Error(1)
 }
 

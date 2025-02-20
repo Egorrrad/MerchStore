@@ -9,12 +9,12 @@ import (
 
 var cfg, _ = cmd.Load()
 
-func GenerateRefreshToken(userID int, username string) (string, error) {
+func GenerateRefreshToken(userID int, username string, expires time.Time) (string, error) {
 	secret := cfg.Service.SecretKey
 	claims := jwt.MapClaims{
 		"user_id":  userID,
 		"username": username,
-		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"exp":      expires.Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
