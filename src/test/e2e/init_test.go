@@ -3,6 +3,7 @@ package e2e
 import (
 	"MerchStore/src/cmd"
 	"MerchStore/src/test"
+	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"log"
@@ -10,8 +11,7 @@ import (
 	"testing"
 )
 
-// Declare a global variable to hold the Docker pool and resource.
-const baseURL = test.BaseURL
+var baseURL string
 
 func TestMain(m *testing.M) {
 	var (
@@ -38,14 +38,14 @@ func TestMain(m *testing.M) {
 	}
 
 	// Запускаем контейнеры
-	dbResource, err1 := test.DeployPostgres(pool, network)
+	dbResource, err1 := test.DeployPostgres(cfg, pool, network)
 	if err1 != nil {
 		test.TearDown(pool, resources, network)
 		log.Fatalf("Could not start PostgreSQL: %v", err1)
 	}
 	resources = append(resources, dbResource)
 
-	redisResource, err1 := test.DeployRedis(pool, network)
+	redisResource, err1 := test.DeployRedis(cfg, pool, network)
 	if err1 != nil {
 		test.TearDown(pool, resources, network)
 		log.Fatalf("Could not start Redis: %v", err1)
@@ -59,6 +59,7 @@ func TestMain(m *testing.M) {
 	}
 	resources = append(resources, apiResource)
 
+	baseURL = fmt.Sprintf("http://localhost:%s", cfg.Service.ServerPort)
 	// Запуск тестов
 	exitCode := m.Run()
 

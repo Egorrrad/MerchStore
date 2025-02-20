@@ -27,6 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
+	cfg.Service.ServerPort = ":" + cfg.Service.ServerPort
 	logger.Init(cfg.Service.LogLevel)
 	slog.Info("Starting server...")
 

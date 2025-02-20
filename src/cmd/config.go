@@ -15,12 +15,14 @@ type DatabaseConfig struct {
 	Password string `env:"DATABASE_PASSWORD,required"`
 	Host     string `env:"DATABASE_HOST,required"`
 	Port     string `env:"DATABASE_PORT,required"`
+	HostPort string `env:"HOST_DATABASE_PORT,required"`
 	Name     string `env:"DATABASE_NAME,required"`
 }
 
 type CacheConfig struct {
-	Host string `env:"CACHE_HOST,required"`
-	Port string `env:"CACHE_PORT,required"`
+	Host     string `env:"CACHE_HOST,required"`
+	Port     string `env:"CACHE_PORT,required"`
+	HostPort string `env:"HOST_CACHE_PORT,required"`
 }
 
 type ServiceConfig struct {
@@ -33,7 +35,6 @@ func Load() (*Config, error) {
 	cfg := Config{}
 
 	err := env.Parse(&cfg)
-	cfg.Service.ServerPort = ":" + cfg.Service.ServerPort
 	if err != nil {
 		return nil, err
 	}
