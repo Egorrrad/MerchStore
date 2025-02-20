@@ -17,8 +17,8 @@ func (s Server) PostApiAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Валидация
-	if errors := schemas.ValidateAuthRequest(req.Username, req.Password); len(errors) > 0 {
-		sendValidationErrors(w, errors)
+	if fieldErrors := schemas.ValidateAuthRequest(req.Username, req.Password); len(fieldErrors) > 0 {
+		sendValidationErrors(w, fieldErrors)
 		return
 	}
 
