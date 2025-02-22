@@ -25,7 +25,7 @@ func (s Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item strin
 		case errors.Is(err, repository.ErrMsgOutOfStock):
 			sendError(w, http.StatusBadRequest, "Item out of stock")
 		case errors.Is(err, repository.ErrMsgProductNotExist):
-			sendError(w, http.StatusNotFound, "Product not found")
+			sendError(w, http.StatusBadRequest, "Product not found")
 		default:
 			sendError(w, http.StatusInternalServerError, "Purchase failed")
 		}

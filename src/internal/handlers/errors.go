@@ -7,11 +7,14 @@ import (
 )
 
 func sendValidationErrors(w http.ResponseWriter, errors []schemas.FieldError) {
-	errorMap := make(map[string]string)
-	for _, err := range errors {
-		errorMap[err.Field] = err.Message
+	errorsStr := ""
+	for i, err := range errors {
+		if i > 0 {
+			errorsStr += ","
+		}
+		errorsStr += err.Error()
 	}
-	respondJSON(w, http.StatusBadRequest, map[string]interface{}{"errors": errorMap})
+	respondJSON(w, http.StatusBadRequest, generated.ErrorResponse{Errors: &errorsStr})
 }
 
 func sendError(w http.ResponseWriter, code int, message string) {

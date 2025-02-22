@@ -30,8 +30,10 @@ func (s Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, repository.ErrMsgNotEnoughCoins):
 			sendError(w, http.StatusBadRequest, "Not enough coins")
+		case errors.Is(err, repository.ErrMsgSentToSelf):
+			sendError(w, http.StatusBadRequest, "You can't transfer coins to self")
 		case errors.Is(err, repository.ErrMsgUserNotExist):
-			sendError(w, http.StatusNotFound, "Receiver not found")
+			sendError(w, http.StatusBadRequest, "Receiver not found")
 		default:
 			sendError(w, http.StatusInternalServerError, "Transfer failed")
 		}

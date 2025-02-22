@@ -45,7 +45,7 @@ func TestBuyItem_Unauthorized(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 }
 
-func TestBuyItem_InternalServerError(t *testing.T) {
+func TestBuyItem_BadRequest(t *testing.T) {
 	// Шаг 1: Аутентификация
 	authReq := map[string]string{
 		"username": "testuser11",
@@ -68,5 +68,5 @@ func TestBuyItem_InternalServerError(t *testing.T) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err = client.Do(req)
 	assert.NoError(t, err)
-	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }

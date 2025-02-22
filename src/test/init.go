@@ -14,7 +14,6 @@ import (
 	"runtime"
 )
 
-// LoadEnv загружает переменные окружения из .env.test
 func LoadEnv() error {
 	envFilePath := filepath.Join("..", ".env")
 	if err := godotenv.Load(envFilePath); err != nil {

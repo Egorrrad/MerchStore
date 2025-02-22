@@ -80,7 +80,7 @@ func TestBuyItem_ProductNotFound(t *testing.T) {
 
 	err := repo.BuyItem(ctx, "testuser", "item1")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "get product error") // Проверяем, что ошибка содержит текст "get product error".
+	assert.Contains(t, err.Error(), "product not exist") // Проверяем, что ошибка содержит текст "get product error".
 
 	// Проверяем, что все методы были вызваны.
 	mockStorage.AssertExpectations(t)

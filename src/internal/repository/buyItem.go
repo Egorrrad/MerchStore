@@ -31,7 +31,7 @@ func (r Repository) BuyItem(ctx context.Context, username, productName string) e
 	// 2. Получаем товар с блокировкой FOR UPDATE
 	product, err := tx.GetProductForUpdate(ctx, productName)
 	if err != nil {
-		return fmt.Errorf("get product error: %w", err)
+		return ErrMsgProductNotExist
 	}
 
 	// Проверка условий

@@ -96,3 +96,36 @@ func TestSendCoin_Unauthorized(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 }
+
+func TestTransferCoinsToSelf(t *testing.T) {
+	// Шаг 1: Аутентификация
+	authReq := map[string]string{
+		"username": "testuser25",
+		"password": "testpassword",
+	}
+	authBody, _ := json.Marshal(authReq)
+	resp, err := http.Post(baseURL+"/api/auth", "application/json", bytes.NewBuffer(authBody))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var authResp struct {
+		Token string `json:"token"`
+	}
+	json.NewDecoder(resp.Body).Decode(&authResp)
+	token := authResp.Token
+
+	// Шаг 2: Отправка монеток
+	sendCoinReq := SendCoinRequest{
+		ReceiverName: "testuser25", // Имя получателя
+		Amount:       10,           // Количество монет
+	}
+	sendCoinBody, _ := json.Marshal(sendCoinReq)
+	req, _ := http.NewRequest("POST", baseURL+"/api/sendCoin", bytes.NewBuffer(sendCoinBody))
+	req.Header.Set("Authorization", token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err = client.Do(req)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
