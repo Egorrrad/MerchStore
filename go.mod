@@ -3,6 +3,7 @@ module MerchStore
 go 1.23.2
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1

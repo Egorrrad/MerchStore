@@ -12,7 +12,9 @@ test-cov:
 test-load:
 	k6 run ./src/test/load_test.js
 
-# Линтинг
+clean-cache:
+	go clean -cache
+
 lint:
 	golangci-lint run ./... --config .golangci.yml
 

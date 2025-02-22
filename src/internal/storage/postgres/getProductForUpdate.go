@@ -15,5 +15,8 @@ func (t *StorageTx) GetProductForUpdate(ctx context.Context, productName string)
 	row := t.tx.QueryRowContext(ctx, query, productName)
 	var product model.Product
 	err := row.Scan(&product.ProductID, &product.Name, &product.Price, &product.Quantity)
+	if err != nil {
+		return nil, err
+	}
 	return &product, err
 }
