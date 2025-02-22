@@ -14,7 +14,11 @@ func TestGetProductForUpdate_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	mock.ExpectBegin()
 	tx, err := db.Begin()
@@ -51,7 +55,11 @@ func TestGetProductForUpdate_Error(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	mock.ExpectBegin()
 	tx, err := db.Begin()

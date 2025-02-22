@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"testing"
 	"time"
@@ -15,7 +16,11 @@ func TestGetUserPurchases_QueryError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock connection: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	storage := &Storage{DB: db}
 	userID := 1
@@ -38,7 +43,11 @@ func TestGetUserPurchases_ScanError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock connection: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	storage := &Storage{DB: db}
 	userID := 1

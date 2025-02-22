@@ -13,5 +13,5 @@ var (
 	ErrMsgInvalidAmount   = errors.New("invalid amount")
 	ErrMsgTokenExpired    = errors.New("token has expired")
 	ErrMsgInvalidToken    = errors.New("invalid token")
-	ErrMsgWrongPass       = errors.New("Wrong password")
+	ErrMsgWrongPass       = errors.New("wrong password")
 )

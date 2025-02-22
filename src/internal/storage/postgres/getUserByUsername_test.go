@@ -14,7 +14,11 @@ func TestGetUserByUsername_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	query := `SELECT user_id, username, password_hash, coins FROM users WHERE username = \$1`
 	rows := sqlmock.NewRows([]string{"user_id", "username", "password_hash", "coins"}).
@@ -41,7 +45,11 @@ func TestGetUserByUsername_Error(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	query := `SELECT user_id, username, password_hash, coins FROM users WHERE username = \$1`
 	mock.ExpectQuery(query).

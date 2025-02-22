@@ -17,7 +17,7 @@ import (
 func LoadEnv() error {
 	envFilePath := filepath.Join("..", ".env")
 	if err := godotenv.Load(envFilePath); err != nil {
-		return fmt.Errorf("Ошибка загрузки .env: %v", err)
+		return fmt.Errorf("ошибка загрузки .env: %v", err)
 	}
 	return nil
 }
@@ -45,7 +45,11 @@ func DeployRedis(cfg *cmd.Config, pool *dockertest.Pool, network *dockertest.Net
 			Password: "",
 			DB:       0,
 		})
-		defer client.Close()
+		defer func(client *redis.Client) {
+			err := client.Close()
+			if err != nil {
+			}
+		}(client)
 		_, err := client.Ping(context.Background()).Result()
 		return err
 	}); err != nil {
@@ -94,7 +98,11 @@ func DeployPostgres(cfg *cmd.Config, pool *dockertest.Pool, network *dockertest.
 		if err != nil {
 			return err
 		}
-		defer db.Close()
+		defer func(db *sql.DB) {
+			err := db.Close()
+			if err != nil {
+			}
+		}(db)
 		return db.Ping()
 	}); err != nil {
 		return nil, fmt.Errorf("could not connect to PostgreSQL: %v", err)

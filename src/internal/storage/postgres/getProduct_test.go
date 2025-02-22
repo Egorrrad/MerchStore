@@ -14,7 +14,9 @@ func TestGetProduct_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
 
 	query := `SELECT product_id, name, price, quantity FROM products WHERE name = \$1`
 	rows := sqlmock.NewRows([]string{"product_id", "name", "price", "quantity"}).
@@ -42,7 +44,9 @@ func TestGetProduct_Error(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
 
 	query := `SELECT product_id, name, price, quantity FROM products WHERE name = \$1`
 	mock.ExpectQuery(query).

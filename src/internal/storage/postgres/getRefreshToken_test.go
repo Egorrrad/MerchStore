@@ -15,7 +15,11 @@ func TestGetRefreshToken_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	query := `SELECT token_id, user_id, token, expires_at, created_at FROM refresh_tokens WHERE user_id = \$1`
 	expiresAt := time.Now().Add(24 * time.Hour)
@@ -46,7 +50,11 @@ func TestGetRefreshToken_Error(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+		}
+	}(db)
 
 	query := `SELECT token_id, user_id, token, expires_at, created_at FROM refresh_tokens WHERE user_id = \$1`
 	mock.ExpectQuery(query).

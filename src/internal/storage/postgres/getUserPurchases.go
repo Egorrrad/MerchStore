@@ -3,6 +3,7 @@ package postgres
 import (
 	"MerchStore/src/internal/storage/model"
 	"context"
+	"database/sql"
 )
 
 func (p *Storage) GetUserPurchases(ctx context.Context, userID int) ([]model.Purchase, error) {
@@ -14,7 +15,11 @@ func (p *Storage) GetUserPurchases(ctx context.Context, userID int) ([]model.Pur
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+		}
+	}(rows)
 
 	var purchases []model.Purchase
 	for rows.Next() {
