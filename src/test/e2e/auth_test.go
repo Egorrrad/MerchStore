@@ -46,7 +46,6 @@ func TestAuth_EmptyUsername(t *testing.T) {
 	// Шаг 2: Проверка, что в ответе есть сообщение об ошибке
 	var authResp map[string]string
 	json.NewDecoder(resp.Body).Decode(&authResp)
-	t.Log(authResp)
 	assert.Equal(t, "username: is required", authResp["errors"])
 }
 
@@ -64,6 +63,5 @@ func TestAuth_EmptyPassword(t *testing.T) {
 	// Шаг 2: Проверка, что в ответе есть сообщение об ошибке
 	var authResp map[string]string
 	json.NewDecoder(resp.Body).Decode(&authResp)
-	t.Log(authResp)
 	assert.Equal(t, "password: is required", authResp["errors"])
 }
