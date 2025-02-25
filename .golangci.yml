@@ -38,6 +38,9 @@ linters:
     - noctx
     - contextcheck
 
+    # Логирование
+    - sloglint
+
 linters-settings:
   # Настройки для staticcheck
   staticcheck:

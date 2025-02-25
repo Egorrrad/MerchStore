@@ -1,34 +1,49 @@
 package middleware
 
 import (
-	"log/slog"
+	"MerchStore/src/internal/logger"
+	"bytes"
+	"io"
 	"net/http"
 	"time"
 )
+
+const maxBodySize = 1024
 
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		// Логируем начало запроса
-		slog.Info("Request started",
+		var requestBody string
+		if r.Body != nil {
+			limitedReader := io.LimitReader(r.Body, maxBodySize+1)
+			bodyBytes, _ := io.ReadAll(limitedReader)
+
+			if len(bodyBytes) > maxBodySize {
+				requestBody = "[too large]"
+			} else {
+				requestBody = string(bodyBytes)
+			}
+
+			r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		}
+
+		logger.Logger.With(
 			"method", r.Method,
 			"path", r.URL.Path,
 			"ip", r.RemoteAddr,
-		)
+			"user-agent", r.UserAgent(),
+			"body", requestBody,
+		).Info("Request started")
 
-		// Обертка для ResponseWriter для захвата статуса
-		lrw := &loggingResponseWriter{ResponseWriter: w}
+		lrw := &loggingResponseWriter{ResponseWriter: w, status: http.StatusOK}
 
 		next.ServeHTTP(lrw, r)
 
-		// Логируем завершение запроса
-		slog.Info("Request completed",
-			"method", r.Method,
-			"path", r.URL.Path,
+		logger.Logger.With(
 			"status", lrw.status,
 			"duration", time.Since(start),
-		)
+		).Info("Request completed")
 	})
 }
 

@@ -14,7 +14,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -28,8 +27,8 @@ func main() {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
 	cfg.Service.ServerPort = ":" + cfg.Service.ServerPort
-	logger.Init(cfg.Service.LogLevel)
-	slog.Info("Starting server...")
+	logger.Init(cfg.Service.LogLevel, "text", "stdout")
+	logger.Logger.Info("Starting server...", "port", cfg.Service.ServerPort)
 
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -39,52 +38,53 @@ func main() {
 		cfg.Database.Password,
 		cfg.Database.Name,
 	)
+
 	store, db := storage.NewDataStorage(dsn)
 	defer func() {
 		if err := postgres.CloseDB(db); err != nil {
-			slog.Error("Database closure error", "error", err)
+			logger.Logger.Error("Database closure error", "error", err)
+		} else {
+			logger.Logger.Info("Database connection closed successfully")
 		}
 	}()
 
 	redisAdr := fmt.Sprintf("%s:%s", cfg.Cache.Host, cfg.Cache.Port)
 	redisRepo := storage.NewCacheStorage(redisAdr)
-	resp := repository.NewRepository(store, redisRepo)
-	server := handlers.NewServer(resp)
+	logger.Logger.Info("Connected to Redis", "address", redisAdr)
 
-	// Создаем опции с middleware
+	resp := repository.NewRepository(store, redisRepo)
+
 	options := generated.StdHTTPServerOptions{
 		Middlewares: []generated.MiddlewareFunc{
 			middleware.AuthMiddleware(resp, cfg.Service.SecretKey),
 			middleware.LoggingMiddleware,
 		},
 	}
-
+	server := handlers.NewServer(resp)
 	h := generated.HandlerWithOptions(server, options)
-
 	s := &http.Server{
 		Addr:    cfg.Service.ServerPort,
 		Handler: h,
 	}
 
-	// Start server in a new goroutine
 	go func() {
-		slog.Info(fmt.Sprintf("Service started on port %s", cfg.Service.ServerPort))
-		if err = s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Info(fmt.Sprintf("Error while starting server: %v", err))
+		logger.Logger.Info("Service started", "port", cfg.Service.ServerPort)
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Logger.Error("Error while starting server", "error", err)
 		}
 	}()
 
-	// Wait for termination signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
-	<-quit
+	sig := <-quit
+	logger.Logger.Warn("Received shutdown signal", "signal", sig.String())
 
-	// Shutdown server gracefully
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err = s.Shutdown(ctx); err != nil {
-		slog.Info(fmt.Sprintf("Error during server shutdown: %v", err))
+	if err := s.Shutdown(ctx); err != nil {
+		logger.Logger.Error("Error during server shutdown", "error", err)
+	} else {
+		logger.Logger.Info("Server gracefully stopped")
 	}
-	slog.Info(fmt.Sprintln("Server gracefully stopped"))
 }
