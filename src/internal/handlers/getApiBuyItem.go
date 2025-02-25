@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"MerchStore/src/internal/logger"
 	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/schemas"
 	"errors"
@@ -27,6 +28,7 @@ func (s Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item strin
 		case errors.Is(err, repository.ErrMsgProductNotExist):
 			sendError(w, http.StatusBadRequest, "Product not found")
 		default:
+			logger.Logger.Error("Unexpected error during purchase", "username", username, "item", item, "error", err)
 			sendError(w, http.StatusInternalServerError, "Purchase failed")
 		}
 		return
@@ -35,5 +37,4 @@ func (s Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item strin
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"message": "Item purchased successfully",
 	})
-	w.WriteHeader(http.StatusOK)
 }

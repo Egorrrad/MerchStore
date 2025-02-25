@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"MerchStore/src/internal/logger"
 	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/schemas"
 	"MerchStore/src/internal/storage/model"
@@ -53,16 +54,18 @@ func buildCoinHistory(operations []model.Operation, currentUserID int) *schemas.
 func (s Server) GetApiInfo(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value("username").(string)
 	if !ok {
+		logger.Logger.Error("Failed to extract username from context", "error", "invalid user context")
 		sendError(w, http.StatusUnauthorized, "invalid user context")
 		return
 	}
 
 	user, purchases, operations, err := s.repo.GetUserInfo(r.Context(), username)
 	if err == repository.ErrMsgUserNotExist {
-		sendError(w, http.StatusInternalServerError, "user not found")
+		sendError(w, http.StatusBadRequest, "user not found")
 		return
 	}
 	if err != nil {
+		logger.Logger.Error("Failed to retrieve user data", "username", username, "error", err)
 		sendError(w, http.StatusInternalServerError, "failed to get user data")
 		return
 	}

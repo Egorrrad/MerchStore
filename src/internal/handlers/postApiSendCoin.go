@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"MerchStore/src/internal/generated"
+	"MerchStore/src/internal/logger"
 	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/schemas"
 	"encoding/json"
@@ -23,7 +24,13 @@ func (s Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sender := r.Context().Value("username").(string)
+	sender, ok := r.Context().Value("username").(string)
+
+	if !ok {
+		logger.Logger.Error("Failed to extract username from context", "error", "invalid user context")
+		sendError(w, http.StatusUnauthorized, "invalid user context")
+		return
+	}
 
 	// Выполняем перевод
 	if err := s.repo.SendCoins(r.Context(), sender, req.ToUser, req.Amount); err != nil {
@@ -35,6 +42,7 @@ func (s Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, repository.ErrMsgUserNotExist):
 			sendError(w, http.StatusBadRequest, "Receiver not found")
 		default:
+			logger.Logger.Error("Transfer failed", "sender", sender, "toUser", req.ToUser, "amount", req.Amount, "error", err)
 			sendError(w, http.StatusInternalServerError, "Transfer failed")
 		}
 		return
