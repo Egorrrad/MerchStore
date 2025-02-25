@@ -32,6 +32,7 @@ func TestGetInfo(t *testing.T) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err = client.Do(req)
 	assert.NoError(t, err)
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// Шаг 3: Проверка ответа

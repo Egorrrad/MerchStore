@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"MerchStore/src/internal/logger"
+	"MerchStore/src/internal/middleware"
 	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/schemas"
 	"errors"
@@ -15,7 +16,12 @@ func (s Server) GetApiBuyItem(w http.ResponseWriter, r *http.Request, item strin
 		return
 	}
 
-	username := r.Context().Value("username").(string)
+	username, ok := r.Context().Value(middleware.UsernameKey).(string)
+	if !ok {
+		logger.Logger.Error("Failed to extract username from context", "error", "invalid user context")
+		sendError(w, http.StatusUnauthorized, "invalid user context")
+		return
+	}
 
 	// Выполняем покупку
 	err := s.repo.BuyItem(r.Context(), username, item)

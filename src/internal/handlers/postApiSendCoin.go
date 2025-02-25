@@ -3,6 +3,7 @@ package handlers
 import (
 	"MerchStore/src/internal/generated"
 	"MerchStore/src/internal/logger"
+	"MerchStore/src/internal/middleware"
 	"MerchStore/src/internal/repository"
 	"MerchStore/src/internal/schemas"
 	"encoding/json"
@@ -24,7 +25,7 @@ func (s Server) PostApiSendCoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sender, ok := r.Context().Value("username").(string)
+	sender, ok := r.Context().Value(middleware.UsernameKey).(string)
 
 	if !ok {
 		logger.Logger.Error("Failed to extract username from context", "error", "invalid user context")

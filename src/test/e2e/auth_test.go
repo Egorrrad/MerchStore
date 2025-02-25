@@ -17,6 +17,7 @@ func TestAuth(t *testing.T) {
 	authBody, _ := json.Marshal(authReq)
 	resp, err := http.Post(baseURL+"/api/auth", "application/json", bytes.NewBuffer(authBody))
 	assert.NoError(t, err)
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// Шаг 2: Проверка, что токен получен
@@ -41,6 +42,7 @@ func TestAuth_EmptyUsername(t *testing.T) {
 	authBody, _ := json.Marshal(authReq)
 	resp, err := http.Post(baseURL+"/api/auth", "application/json", bytes.NewBuffer(authBody))
 	assert.NoError(t, err)
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode) // Ожидаем ошибку из-за пустого имени пользователя
 
 	// Шаг 2: Проверка, что в ответе есть сообщение об ошибке
@@ -58,6 +60,7 @@ func TestAuth_EmptyPassword(t *testing.T) {
 	authBody, _ := json.Marshal(authReq)
 	resp, err := http.Post(baseURL+"/api/auth", "application/json", bytes.NewBuffer(authBody))
 	assert.NoError(t, err)
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode) // Ожидаем ошибку из-за пустого пароля
 
 	// Шаг 2: Проверка, что в ответе есть сообщение об ошибке

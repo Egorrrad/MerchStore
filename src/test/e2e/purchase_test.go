@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -63,7 +64,8 @@ func TestBuyItem_BadRequest(t *testing.T) {
 	token := authResp.Token
 
 	// Шаг 2: Попытка купить предмет, что вызовет ошибку на сервере
-	req, _ := http.NewRequest("GET", baseURL+"/api/buy/broken-item", nil) // Предмет, который вызывает ошибку
+	ctx := context.Background()
+	req, _ := http.NewRequestWithContext(ctx, "GET", baseURL+"/api/buy/broken-item", nil) // Предмет, который вызывает ошибку
 	req.Header.Set("Authorization", token)
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err = client.Do(req)

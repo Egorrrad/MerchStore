@@ -13,8 +13,8 @@ type MockStorage struct {
 }
 
 func (m *MockStorage) UpdateRefreshToken(ctx context.Context, id int, token string, expires time.Time) error {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(ctx, id, token, expires)
+	return args.Error(0)
 }
 
 type MockTransaction struct {

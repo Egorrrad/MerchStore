@@ -45,11 +45,7 @@ func DeployRedis(cfg *cmd.Config, pool *dockertest.Pool, network *dockertest.Net
 			Password: "",
 			DB:       0,
 		})
-		defer func(client *redis.Client) {
-			err := client.Close()
-			if err != nil {
-			}
-		}(client)
+		defer client.Close()
 		_, err := client.Ping(context.Background()).Result()
 		return err
 	}); err != nil {
@@ -98,11 +94,7 @@ func DeployPostgres(cfg *cmd.Config, pool *dockertest.Pool, network *dockertest.
 		if err != nil {
 			return err
 		}
-		defer func(db *sql.DB) {
-			err := db.Close()
-			if err != nil {
-			}
-		}(db)
+		defer db.Close()
 		return db.Ping()
 	}); err != nil {
 		return nil, fmt.Errorf("could not connect to PostgreSQL: %v", err)
@@ -145,14 +137,16 @@ func DeployAPIContainer(cfg *cmd.Config, pool *dockertest.Pool, network *dockert
 		return nil, fmt.Errorf("could not start API container: %v", err)
 	}
 
+	var resp *http.Response
 	if err = pool.Retry(func() error {
 		fmt.Println("Checking API connection...")
 		url := fmt.Sprintf("http://localhost:%s/api/info", cfg.Service.ServerPort)
-		_, err := http.Get(url)
+		resp, err = http.Get(url)
 		return err
 	}); err != nil {
 		return nil, fmt.Errorf("API container is not responding: %v", err)
 	}
+	defer resp.Body.Close()
 
 	return resource, nil
 }

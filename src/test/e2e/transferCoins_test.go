@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -70,7 +71,8 @@ func TestSendCoin_BadRequest(t *testing.T) {
 		ReceiverName: "testuser2", // Некорректно, не указано количество монет
 	}
 	sendCoinBody, _ := json.Marshal(sendCoinReq)
-	req, _ := http.NewRequest("POST", baseURL+"/api/sendCoin", bytes.NewBuffer(sendCoinBody))
+	ctx := context.Background()
+	req, _ := http.NewRequestWithContext(ctx, "POST", baseURL+"/api/sendCoin", bytes.NewBuffer(sendCoinBody))
 	req.Header.Set("Authorization", token)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -87,7 +89,8 @@ func TestSendCoin_Unauthorized(t *testing.T) {
 		Amount:       10,
 	}
 	sendCoinBody, _ := json.Marshal(sendCoinReq)
-	req, _ := http.NewRequest("POST", baseURL+"/api/sendCoin", bytes.NewBuffer(sendCoinBody))
+	ctx := context.Background()
+	req, _ := http.NewRequestWithContext(ctx, "POST", baseURL+"/api/sendCoin", bytes.NewBuffer(sendCoinBody))
 	req.Header.Set("Authorization", "Bearer invalid_token") // Неправильный токен
 	req.Header.Set("Content-Type", "application/json")
 

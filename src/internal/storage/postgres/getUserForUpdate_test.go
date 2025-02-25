@@ -14,11 +14,7 @@ func TestGetUserForUpdate_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-		}
-	}(db)
+	defer db.Close()
 
 	mock.ExpectBegin()
 	tx, err := db.Begin()
@@ -54,11 +50,7 @@ func TestGetUserForUpdate_Error(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create mock: %v", err)
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-		}
-	}(db)
+	defer db.Close()
 
 	mock.ExpectBegin()
 	tx, err := db.Begin()

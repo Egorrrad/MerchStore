@@ -3,7 +3,6 @@ package postgres
 import (
 	"MerchStore/src/internal/storage/model"
 	"context"
-	"database/sql"
 )
 
 func (p *Storage) GetUserOperations(ctx context.Context, userID int) ([]model.Operation, error) {
@@ -30,11 +29,7 @@ func (p *Storage) GetUserOperations(ctx context.Context, userID int) ([]model.Op
 	if err != nil {
 		return nil, err
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-		}
-	}(rows)
+	defer rows.Close()
 
 	var operations []model.Operation
 	for rows.Next() {
